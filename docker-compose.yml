@@ -1,0 +1,50 @@
+services:
+    web1:
+        build: ./library_app
+        container_name: library_app
+        restart: always
+        volumes:
+          - ./library_app:/app
+        ports:
+          - "8001:8000"
+        depends_on:
+          - db
+        env_file:
+          - .env
+        command: >
+          sh -c "python manage.py makemigrations && 
+          python manage.py migrate && 
+          python manage.py createsuperuser &&
+          python manage.py runserver 0.0.0.0.:8000"
+
+
+    web2:
+        build: ./tasks_app
+        container_name: task_app
+        restart: always
+        volumes:
+          - ./tasks_app:/app
+        ports:
+          - "8002:8000"
+        depends_on:
+          - db
+        env_file:
+          - .env
+        command: >
+          sh -c "python manage.py makemigrations && 
+          python manage.py migrate && 
+          python manage.py createsuperuser &&
+          python manage.py runserver 0.0.0.0.:8000" 
+
+
+    db:
+        image: postgres:latest
+        container_name: postgres_db
+        restart: always
+        env_file:
+          - .env
+        volumes:
+          - postgres_data:/var/lib/postgresql/data
+
+volumes:
+    postgres_data:
